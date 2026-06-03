@@ -46,7 +46,7 @@ db.User.hasMany(db.Organization, {
 });
 db.Organization.belongsTo(db.User, {
   foreignKey: "ownerId",
-  as: "user",
+  as: "owner",
 });
 
 module.exports = db;

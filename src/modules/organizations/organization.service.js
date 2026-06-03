@@ -20,4 +20,62 @@ const createOrganization = async ({ name, ownerId, logoUrl }) => {
   return organization;
 };
 
-module.exports = { createOrganization };
+const getBySlugOrganization = async (slug) => {
+  const existingOrg = await Organization.findOne({
+    where: { slug, deletedAt: null },
+    include: [
+      {
+        association: "owner",
+        attributes: {
+          exclude: [
+            "passwordHash",
+            "lastLoginAt",
+            "createdAt",
+            "updatedAt",
+            "deletedAt",
+          ],
+        },
+        where: { status: "active" },
+      },
+    ],
+  });
+
+  if (!existingOrg) {
+    throw createError(404, "Organization not found");
+  }
+
+  return existingOrg;
+};
+
+const getOrganizations = async (slug) => {
+  const orgList = await Organization.findAll({
+    where: { deletedAt: null },
+    include: [
+      {
+        association: "owner",
+        attributes: {
+          exclude: [
+            "passwordHash",
+            "lastLoginAt",
+            "createdAt",
+            "updatedAt",
+            "deletedAt",
+          ],
+        },
+        where: { status: "active" },
+      },
+    ],
+  });
+
+  if (orgList?.length === 0) {
+    throw createError(404, "Organizations not found");
+  }
+
+  return orgList;
+};
+
+module.exports = {
+  createOrganization,
+  getBySlugOrganization,
+  getOrganizations,
+};

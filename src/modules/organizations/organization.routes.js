@@ -8,5 +8,7 @@ router.post(
   validate(createOrganizationSchema),
   organizationController.createOrganization,
 );
+router.get("/:slug", organizationController.getBySlugOrganization);
+router.get("/", organizationController.getOrganizations);
 
 module.exports = router;
