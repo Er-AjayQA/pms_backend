@@ -8,8 +8,8 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      key: {
-        type: Sequelize.STRING(120),
+      slug: {
+        type: Sequelize.STRING(300),
         allowNull: false,
         unique: true,
       },
@@ -25,8 +25,15 @@ module.exports = {
         allowNull: false,
         type: Sequelize.DATE,
       },
+      deletedAt: {
+        allowNull: true,
+        type: Sequelize.DATE,
+      },
     });
 
+    await queryInterface.addIndex("permissions", ["slug"], {
+      unique: true,
+    });
     await queryInterface.addIndex("permissions", ["key"], {
       unique: true,
     });
