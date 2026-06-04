@@ -1,23 +1,24 @@
 const router = require("express").Router();
-const permissionController = require("./permissions.controller");
+const roleController = require("./roles.controller");
 const validate = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");
-const { createPermissionSchema } = require("./permissions.validation");
+const { createRoleSchema, updateRoleSchema } = require("./roles.validation");
 
 router.post(
   "/",
   authMiddleware,
-  validate(createPermissionSchema),
-  permissionController.createPermission,
+  validate(createRoleSchema),
+  roleController.createRole,
 );
-router.get("/", authMiddleware, permissionController.getPermissions);
-router.get("/:slug", authMiddleware, permissionController.getBySlugPermission);
-router.put("/:slug", authMiddleware, permissionController.updatePermission);
-router.patch(
+router.get("/", authMiddleware, roleController.getRoles);
+router.get("/:slug", authMiddleware, roleController.getBySlugRole);
+router.put(
   "/:slug",
   authMiddleware,
-  permissionController.updateStatusPermission,
+  validate(updateRoleSchema),
+  roleController.updateRole,
 );
-router.delete("/:slug", authMiddleware, permissionController.deletePermission);
+router.patch("/:slug", authMiddleware, roleController.updateStatusRole);
+router.delete("/:slug", authMiddleware, roleController.deleteRole);
 
 module.exports = router;

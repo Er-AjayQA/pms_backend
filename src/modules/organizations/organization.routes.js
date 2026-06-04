@@ -16,6 +16,11 @@ router.get(
   authMiddleware,
   organizationController.getBySlugOrganization,
 );
+router.get(
+  "/:slug/roles",
+  authMiddleware,
+  organizationController.getRolesOrganization,
+);
 router.put("/:slug", authMiddleware, organizationController.updateOrganization);
 router.patch(
   "/:slug",

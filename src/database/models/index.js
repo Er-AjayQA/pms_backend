@@ -32,6 +32,10 @@ db.Organization = require("../../modules/organizations/organization.model")(
 //   sequelize,
 //   Sequelize.DataTypes,
 // );
+db.Role = require("../../modules/roles/roles.model")(
+  sequelize,
+  Sequelize.DataTypes,
+);
 
 // User & Refresh Token tables associations
 db.User.hasMany(db.RefreshToken, {
@@ -51,6 +55,16 @@ db.User.hasMany(db.Organization, {
 db.Organization.belongsTo(db.User, {
   foreignKey: "ownerId",
   as: "owner",
+});
+
+// Role & Organization tables associations
+db.Organization.hasMany(db.Role, {
+  foreignKey: "organizationId",
+  as: "roles",
+});
+db.Role.belongsTo(db.Organization, {
+  foreignKey: "organizationId",
+  as: "organization",
 });
 
 module.exports = db;

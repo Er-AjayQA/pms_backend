@@ -1,11 +1,22 @@
 const { z } = require("zod");
 
-const createPermissionSchema = z.object({
+const createRoleSchema = z.object({
   body: z.object({
-    module: z.string(),
-    action: z.string(),
+    organizationId: z.string().optional(),
+    name: z.string(),
+    isSystem: z.boolean(),
     description: z.string().optional(),
   }),
 });
 
-module.exports = { createPermissionSchema };
+const updateRoleSchema = z.object({
+  body: z.object({
+    organizationId: z.string().optional(),
+    name: z.string(),
+    isSystem: z.boolean(),
+    description: z.string().optional(),
+    status: z.string(),
+  }),
+});
+
+module.exports = { createRoleSchema, updateRoleSchema };

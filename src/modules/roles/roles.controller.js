@@ -1,8 +1,8 @@
-const permissionService = require("./permissions.service");
+const roleService = require("./roles.service");
 
-const createPermission = async (req, res, next) => {
+const createRole = async (req, res, next) => {
   try {
-    const data = await permissionService.createPermission(req.body);
+    const data = await roleService.createRole(req.body);
 
     res.status(201).json({
       success: true,
@@ -14,9 +14,9 @@ const createPermission = async (req, res, next) => {
   }
 };
 
-const getBySlugPermission = async (req, res, next) => {
+const getBySlugRole = async (req, res, next) => {
   try {
-    const data = await permissionService.getBySlugPermission(req.params.slug);
+    const data = await roleService.getBySlugRole(req.params.slug);
 
     res.status(200).json({
       success: true,
@@ -28,9 +28,9 @@ const getBySlugPermission = async (req, res, next) => {
   }
 };
 
-const getPermissions = async (req, res, next) => {
+const getRoles = async (req, res, next) => {
   try {
-    const dataList = await permissionService.getPermissions();
+    const dataList = await roleService.getRoles();
 
     res.status(200).json({
       success: true,
@@ -42,12 +42,9 @@ const getPermissions = async (req, res, next) => {
   }
 };
 
-const updatePermission = async (req, res, next) => {
+const updateRole = async (req, res, next) => {
   try {
-    const data = await permissionService.updatePermission(
-      req.params.slug,
-      req.body,
-    );
+    const data = await roleService.updateRole(req.params.slug, req.body);
 
     res.status(201).json({
       success: true,
@@ -59,11 +56,9 @@ const updatePermission = async (req, res, next) => {
   }
 };
 
-const updateStatusPermission = async (req, res, next) => {
+const updateStatusRole = async (req, res, next) => {
   try {
-    const data = await permissionService.updateStatusPermission(
-      req.params.slug,
-    );
+    const data = await roleService.updateStatusRole(req.params.slug);
 
     res.status(201).json({
       success: true,
@@ -75,9 +70,9 @@ const updateStatusPermission = async (req, res, next) => {
   }
 };
 
-const deletePermission = async (req, res, next) => {
+const deleteRole = async (req, res, next) => {
   try {
-    const data = await permissionService.deletePermission(req.params.slug);
+    const data = await roleService.deleteRole(req.params.slug);
 
     res.status(201).json({
       success: true,
@@ -90,10 +85,10 @@ const deletePermission = async (req, res, next) => {
 };
 
 module.exports = {
-  createPermission,
-  getBySlugPermission,
-  getPermissions,
-  updatePermission,
-  updateStatusPermission,
-  deletePermission,
+  createRole,
+  getBySlugRole,
+  getRoles,
+  updateRole,
+  updateStatusRole,
+  deleteRole,
 };

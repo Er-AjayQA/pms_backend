@@ -34,9 +34,6 @@ module.exports = {
     await queryInterface.addIndex("permissions", ["slug"], {
       unique: true,
     });
-    await queryInterface.addIndex("permissions", ["key"], {
-      unique: true,
-    });
   },
 
   async down(queryInterface) {

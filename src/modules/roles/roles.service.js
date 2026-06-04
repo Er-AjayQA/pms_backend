@@ -1,29 +1,31 @@
-const { Permission } = require("../../database/models");
+const { Role } = require("../../database/models");
 const createError = require("http-errors");
 const generateSlug = require("../../utils/generateSlug");
 const { Op } = require("sequelize");
 
-const createPermission = async ({ key, description }) => {
-  const slug = generateSlug(key);
-  const existingData = await Permission.findOne({
+const createRole = async ({ organizationId, name, description, isSystem }) => {
+  const slug = generateSlug(name);
+  const existingData = await Role.findOne({
     where: { slug, deletedAt: null },
   });
 
   if (existingData) {
-    throw createError(409, "Permission slug already exists");
+    throw createError(409, "Role slug already exists");
   }
 
-  const data = await Permission.create({
-    key,
+  const data = await Role.create({
+    organizationId,
+    name,
     slug,
     description,
+    isSystem,
   });
 
   return data;
 };
 
-const getBySlugPermission = async (slug) => {
-  const existingData = await Permission.findOne({
+const getBySlugRole = async (slug) => {
+  const existingData = await Role.findOne({
     where: { slug, deletedAt: null },
   });
 
@@ -34,8 +36,8 @@ const getBySlugPermission = async (slug) => {
   return existingData;
 };
 
-const getPermissions = async (slug) => {
-  const dataList = await Permission.findAll({
+const getRoles = async (slug) => {
+  const dataList = await Role.findAll({
     where: { deletedAt: null },
   });
 
@@ -46,8 +48,11 @@ const getPermissions = async (slug) => {
   return dataList;
 };
 
-const updatePermission = async (slug, { key, description }) => {
-  const existingData = await Permission.findOne({
+const updateRole = async (
+  slug,
+  { organizationId, name, description, isSystem, status },
+) => {
+  const existingData = await Role.findOne({
     where: { slug, deletedAt: null },
   });
 
@@ -55,12 +60,12 @@ const updatePermission = async (slug, { key, description }) => {
     throw createError(409, "Data not found");
   }
 
-  const isKeyChange = key && existingData.key !== key;
+  const isNameChange = name && existingData?.name !== name;
 
-  const newSlug = isKeyChange ? generateSlug(key) : existingData.slug;
+  const newSlug = isNameChange ? generateSlug(name) : existingData?.slug;
 
-  if (isKeyChange) {
-    const checkNewSlug = await Permission.findOne({
+  if (isNameChange) {
+    const checkNewSlug = await Role.findOne({
       where: {
         slug: newSlug,
         id: { [Op.ne]: existingData.id },
@@ -68,34 +73,37 @@ const updatePermission = async (slug, { key, description }) => {
     });
 
     if (checkNewSlug) {
-      throw createError(409, "Key already exists");
+      throw createError(409, "Name already exists");
     }
   }
 
-  await Permission.update(
+  await Role.update(
     {
-      key,
+      Name,
+      organizationId,
       slug: newSlug,
       description,
+      isSystem,
+      status,
     },
     {
       where: { id: existingData.id },
     },
   );
 
-  return await Permission.findByPk(existingData.id);
+  return await Role.findByPk(existingData.id);
 };
 
-const updateStatusPermission = async (slug) => {
-  const existingData = await Permission.findOne({
+const updateStatusRole = async (slug) => {
+  const existingData = await Role.findOne({
     where: { slug, deletedAt: null },
   });
 
   if (!existingData) {
-    throw createError(409, "Permission not found");
+    throw createError(409, "Role not found");
   }
 
-  await Permission.update(
+  await Role.update(
     {
       status: existingData?.status === "active" ? "inactive" : "active",
     },
@@ -104,11 +112,11 @@ const updateStatusPermission = async (slug) => {
     },
   );
 
-  return await Permission.findByPk(existingData.id);
+  return await Role.findByPk(existingData.id);
 };
 
-const deletePermission = async (slug) => {
-  const existingData = await Permission.findOne({
+const deleteRole = async (slug) => {
+  const existingData = await Role.findOne({
     where: { slug, deletedAt: null },
   });
 
@@ -116,7 +124,7 @@ const deletePermission = async (slug) => {
     throw createError(409, "Data not found");
   }
 
-  await Permission.update(
+  await Role.update(
     {
       deletedAt: new Date(),
     },
@@ -125,14 +133,14 @@ const deletePermission = async (slug) => {
     },
   );
 
-  return await Permission.findByPk(existingData.id);
+  return await Role.findByPk(existingData.id);
 };
 
 module.exports = {
-  createPermission,
-  getBySlugPermission,
-  getPermissions,
-  updatePermission,
-  updateStatusPermission,
-  deletePermission,
+  createRole,
+  getBySlugRole,
+  getRoles,
+  updateRole,
+  updateStatusRole,
+  deleteRole,
 };

@@ -1,6 +1,5 @@
 "use strict";
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("roles", {
@@ -23,9 +22,10 @@ module.exports = {
         type: Sequelize.STRING(100),
         allowNull: false,
       },
-      key: {
-        type: Sequelize.STRING(80),
+      slug: {
+        type: Sequelize.STRING(300),
         allowNull: false,
+        unique: true,
       },
       description: {
         type: Sequelize.STRING,
@@ -35,6 +35,10 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+      },
+      status: {
+        type: Sequelize.ENUM("active", "inactive"),
+        defaultValue: "active",
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -50,9 +54,9 @@ module.exports = {
       },
     });
     await queryInterface.addIndex("roles", ["organizationId"]);
-    await queryInterface.addIndex("roles", ["organizationId", "key"], {
+    await queryInterface.addIndex("roles", ["organizationId", "slug"], {
       unique: true,
-      name: "unique_role_key_per_org",
+      name: "unique_role_slug_per_org",
     });
   },
 

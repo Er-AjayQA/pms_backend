@@ -3,7 +3,8 @@ const router = require("express").Router();
 const authRoutes = require("./modules/auth/auth.routes");
 const userRoutes = require("./modules/users/user.routes");
 const organizationRoutes = require("./modules/organizations/organization.routes");
-const permissionRoutes = require("./modules/permissions/permissions.routes");
+// const permissionRoutes = require("./modules/permissions/permissions.routes");
+const roleRoutes = require("./modules/roles/roles.routes");
 
 router.get("/", (req, res) => {
   res.json({
@@ -15,6 +16,7 @@ router.get("/", (req, res) => {
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/organizations", organizationRoutes);
-router.use("/permissions", permissionRoutes);
+// router.use("/permissions", permissionRoutes);
+router.use("/roles", roleRoutes);
 
 module.exports = router;
