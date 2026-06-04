@@ -3,6 +3,7 @@ const organizationController = require("./organization.controller");
 const validate = require("../../middlewares/validate.middleware");
 const { createOrganizationSchema } = require("./organization.validation");
 const authMiddleware = require("../../middlewares/auth.middleware");
+const rolesRoutes = require("../roles/roles.routes");
 
 router.post(
   "/",
@@ -16,11 +17,6 @@ router.get(
   authMiddleware,
   organizationController.getBySlugOrganization,
 );
-router.get(
-  "/:slug/roles",
-  authMiddleware,
-  organizationController.getRolesOrganization,
-);
 router.put("/:slug", authMiddleware, organizationController.updateOrganization);
 router.patch(
   "/:slug",
@@ -32,5 +28,8 @@ router.delete(
   authMiddleware,
   organizationController.deleteOrganization,
 );
+
+// Roles Routes
+router.use("/:orgSlug/roles", rolesRoutes);
 
 module.exports = router;

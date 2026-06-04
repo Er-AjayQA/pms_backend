@@ -1,4 +1,4 @@
-const { Organization, Role } = require("../../database/models");
+const { Organization } = require("../../database/models");
 const createError = require("http-errors");
 const generateSlug = require("../../utils/generateSlug");
 const { Op } = require("sequelize");
@@ -161,35 +161,6 @@ const deleteOrganization = async (slug) => {
   return await Organization.findByPk(existingOrg.id);
 };
 
-const getRolesOrganization = async (slug) => {
-  const org = await Organization.findOne({ where: { slug, deletedAt: null } });
-
-  if (!org) {
-    throw createError(404, "Organization not found");
-  }
-
-  const dataList = await Role.findAll({
-    where: {
-      deletedAt: null,
-      [Op.or]: [
-        {
-          organizationId: org.id,
-        },
-        {
-          organizationId: null,
-          isSystem: true,
-        },
-      ],
-    },
-  });
-
-  if (dataList?.length === 0) {
-    throw createError(404, "Roles not found");
-  }
-
-  return dataList;
-};
-
 module.exports = {
   createOrganization,
   getBySlugOrganization,
@@ -197,5 +168,4 @@ module.exports = {
   updateOrganization,
   deleteOrganization,
   updateStatusOrganization,
-  getRolesOrganization,
 };

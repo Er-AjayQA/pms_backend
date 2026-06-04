@@ -1,4 +1,5 @@
 const organizationService = require("./organization.service");
+const roleService = require("../roles/roles.service");
 
 const createOrganization = async (req, res, next) => {
   try {
@@ -93,22 +94,6 @@ const updateStatusOrganization = async (req, res, next) => {
   }
 };
 
-const getRolesOrganization = async (req, res, next) => {
-  try {
-    const dataList = await organizationService.getRolesOrganization(
-      req.params.slug,
-    );
-
-    res.status(200).json({
-      success: true,
-      message: "Roles retrieved successfully",
-      data: { dataList },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   createOrganization,
   getBySlugOrganization,
@@ -116,5 +101,4 @@ module.exports = {
   updateOrganization,
   deleteOrganization,
   updateStatusOrganization,
-  getRolesOrganization,
 };

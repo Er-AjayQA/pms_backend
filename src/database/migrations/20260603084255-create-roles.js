@@ -22,11 +22,6 @@ module.exports = {
         type: Sequelize.STRING(100),
         allowNull: false,
       },
-      slug: {
-        type: Sequelize.STRING(300),
-        allowNull: false,
-        unique: true,
-      },
       description: {
         type: Sequelize.STRING,
         allowNull: true,
@@ -54,10 +49,6 @@ module.exports = {
       },
     });
     await queryInterface.addIndex("roles", ["organizationId"]);
-    await queryInterface.addIndex("roles", ["organizationId", "slug"], {
-      unique: true,
-      name: "unique_role_slug_per_org",
-    });
   },
 
   async down(queryInterface) {

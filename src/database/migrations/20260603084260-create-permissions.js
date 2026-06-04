@@ -8,11 +8,6 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      slug: {
-        type: Sequelize.STRING(300),
-        allowNull: false,
-        unique: true,
-      },
       description: {
         type: Sequelize.STRING,
         allowNull: true,
@@ -29,10 +24,6 @@ module.exports = {
         allowNull: true,
         type: Sequelize.DATE,
       },
-    });
-
-    await queryInterface.addIndex("permissions", ["slug"], {
-      unique: true,
     });
   },
 

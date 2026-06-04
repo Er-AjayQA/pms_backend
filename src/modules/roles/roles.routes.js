@@ -1,4 +1,4 @@
-const router = require("express").Router();
+const router = require("express").Router({ mergeParams: true });
 const roleController = require("./roles.controller");
 const validate = require("../../middlewares/validate.middleware");
 const authMiddleware = require("../../middlewares/auth.middleware");

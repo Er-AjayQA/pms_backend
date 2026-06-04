@@ -1,12 +1,41 @@
-const { Role } = require("../../database/models");
+const { Organization, Role } = require("../../database/models");
 const createError = require("http-errors");
 const generateSlug = require("../../utils/generateSlug");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 
-const createRole = async ({ organizationId, name, description, isSystem }) => {
-  const slug = generateSlug(name);
+// HELPER FUNCTIONS
+const getOrgDetails = async (orgSlug) => {
+  const orgData = await Organization.findOne({
+    where: { slug: orgSlug, deletedAt: null },
+  });
+
+  if (!orgData) {
+    throw createError(404, "Organization not found");
+  }
+
+  return orgData;
+};
+
+const getRoleDetails = async (slug, orgId) => {
+  const data = await Role.findOne({
+    where: { slug, organizationId: orgId, deletedAt: null },
+  });
+
+  if (!data) {
+    throw createError(404, "Role not found");
+  }
+
+  return data;
+};
+
+// SERVICES
+const createRole = async (orgSlug, { name, description, isSystem }) => {
+  const orgData = await getOrgDetails(orgSlug);
+
+  const roleSlug = generateSlug(name);
+
   const existingData = await Role.findOne({
-    where: { slug, deletedAt: null },
+    where: { slug: roleSlug, organizationId: orgData?.id, deletedAt: null },
   });
 
   if (existingData) {
@@ -14,9 +43,9 @@ const createRole = async ({ organizationId, name, description, isSystem }) => {
   }
 
   const data = await Role.create({
-    organizationId,
+    organizationId: orgData?.id,
     name,
-    slug,
+    slug: roleSlug,
     description,
     isSystem,
   });
@@ -24,9 +53,18 @@ const createRole = async ({ organizationId, name, description, isSystem }) => {
   return data;
 };
 
-const getBySlugRole = async (slug) => {
+const getBySlugRole = async ({ orgSlug, slug }) => {
+  const orgData = await getOrgDetails(orgSlug);
+
   const existingData = await Role.findOne({
-    where: { slug, deletedAt: null },
+    where: {
+      slug,
+      deletedAt: null,
+      [Op.or]: [
+        { organizationId: orgData?.id },
+        { organizationId: null, isSystem: true },
+      ],
+    },
   });
 
   if (!existingData) {
@@ -36,25 +74,38 @@ const getBySlugRole = async (slug) => {
   return existingData;
 };
 
-const getRoles = async (slug) => {
+const getRoles = async (orgSlug) => {
+  const orgData = await getOrgDetails(orgSlug);
+
   const dataList = await Role.findAll({
-    where: { deletedAt: null },
+    where: {
+      deletedAt: null,
+      [Op.or]: [
+        {
+          organizationId: org.id,
+        },
+        {
+          organizationId: null,
+          isSystem: true,
+        },
+      ],
+    },
   });
 
   if (dataList?.length === 0) {
-    throw createError(404, "Data not found");
+    throw createError(404, "Roles not found");
   }
 
   return dataList;
 };
 
 const updateRole = async (
-  slug,
+  { orgSlug, slug },
   { organizationId, name, description, isSystem, status },
 ) => {
-  const existingData = await Role.findOne({
-    where: { slug, deletedAt: null },
-  });
+  const orgData = await getOrgDetails(orgSlug);
+
+  const existingData = await getRoleDetails(slug, orgData?.id);
 
   if (!existingData) {
     throw createError(409, "Data not found");
@@ -68,6 +119,7 @@ const updateRole = async (
     const checkNewSlug = await Role.findOne({
       where: {
         slug: newSlug,
+        organizationId: orgData?.id,
         id: { [Op.ne]: existingData.id },
       },
     });

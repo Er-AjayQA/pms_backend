@@ -2,7 +2,7 @@ const roleService = require("./roles.service");
 
 const createRole = async (req, res, next) => {
   try {
-    const data = await roleService.createRole(req.body);
+    const data = await roleService.createRole(req.params.orgSlug, req.body);
 
     res.status(201).json({
       success: true,
@@ -16,7 +16,7 @@ const createRole = async (req, res, next) => {
 
 const getBySlugRole = async (req, res, next) => {
   try {
-    const data = await roleService.getBySlugRole(req.params.slug);
+    const data = await roleService.getBySlugRole(req.params);
 
     res.status(200).json({
       success: true,
@@ -44,7 +44,7 @@ const getRoles = async (req, res, next) => {
 
 const updateRole = async (req, res, next) => {
   try {
-    const data = await roleService.updateRole(req.params.slug, req.body);
+    const data = await roleService.updateRole(req.params, req.body);
 
     res.status(201).json({
       success: true,
