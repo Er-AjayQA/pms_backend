@@ -1,10 +1,13 @@
 const { Organization } = require("../../database/models");
 const createError = require("http-errors");
 const generateSlug = require("../../utils/generateSlug");
+const { Op } = require("sequelize");
 
 const createOrganization = async ({ name, ownerId, logoUrl }) => {
   const slug = generateSlug(name);
-  const existingOrg = await Organization.findOne({ where: { slug } });
+  const existingOrg = await Organization.findOne({
+    where: { slug, deletedAt: null },
+  });
 
   if (existingOrg) {
     throw createError(409, "Organization slug already exists");
@@ -74,8 +77,95 @@ const getOrganizations = async (slug) => {
   return orgList;
 };
 
+const updateOrganization = async (slug, { name, ownerId, logoUrl, status }) => {
+  const existingOrg = await Organization.findOne({
+    where: { slug, deletedAt: null },
+  });
+
+  if (!existingOrg) {
+    throw createError(409, "Organization not found");
+  }
+
+  const isNameChange = name && existingOrg.name !== name;
+
+  const newSlug = isNameChange ? generateSlug(name) : existingOrg.slug;
+
+  if (isNameChange) {
+    const checkNewSlug = await Organization.findOne({
+      where: {
+        slug: newSlug,
+        id: { [Op.ne]: existingOrg.id },
+      },
+    });
+
+    if (checkNewSlug) {
+      throw createError(409, "Organization slug already exists");
+    }
+  }
+
+  await Organization.update(
+    {
+      name,
+      slug: newSlug,
+      ownerId,
+      logoUrl,
+      status,
+    },
+    {
+      where: { id: existingOrg.id },
+    },
+  );
+
+  return await Organization.findByPk(existingOrg.id);
+};
+
+const updateStatusOrganization = async (slug) => {
+  const existingOrg = await Organization.findOne({
+    where: { slug, deletedAt: null },
+  });
+
+  if (!existingOrg) {
+    throw createError(409, "Organization not found");
+  }
+
+  await Organization.update(
+    {
+      status: existingOrg?.status === "active" ? "inactive" : "active",
+    },
+    {
+      where: { id: existingOrg.id },
+    },
+  );
+
+  return await Organization.findByPk(existingOrg.id);
+};
+
+const deleteOrganization = async (slug) => {
+  const existingOrg = await Organization.findOne({
+    where: { slug, deletedAt: null },
+  });
+
+  if (!existingOrg) {
+    throw createError(409, "Organization not found");
+  }
+
+  await Organization.update(
+    {
+      deletedAt: new Date(),
+    },
+    {
+      where: { id: existingOrg.id },
+    },
+  );
+
+  return await Organization.findByPk(existingOrg.id);
+};
+
 module.exports = {
   createOrganization,
   getBySlugOrganization,
   getOrganizations,
+  updateOrganization,
+  deleteOrganization,
+  updateStatusOrganization,
 };

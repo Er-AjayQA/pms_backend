@@ -44,8 +44,60 @@ const getOrganizations = async (req, res, next) => {
   }
 };
 
+const updateOrganization = async (req, res, next) => {
+  try {
+    const organization = await organizationService.updateOrganization(
+      req.params.slug,
+      req.body,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Organization updated successfully",
+      data: { organization },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteOrganization = async (req, res, next) => {
+  try {
+    const organization = await organizationService.deleteOrganization(
+      req.params.slug,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Organization deleted successfully",
+      data: { organization },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateStatusOrganization = async (req, res, next) => {
+  try {
+    const organization = await organizationService.updateStatusOrganization(
+      req.params.slug,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "Status changed successfully",
+      data: { organization },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrganization,
   getBySlugOrganization,
   getOrganizations,
+  updateOrganization,
+  deleteOrganization,
+  updateStatusOrganization,
 };

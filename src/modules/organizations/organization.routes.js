@@ -2,13 +2,30 @@ const router = require("express").Router();
 const organizationController = require("./organization.controller");
 const validate = require("../../middlewares/validate.middleware");
 const { createOrganizationSchema } = require("./organization.validation");
+const authMiddleware = require("../../middlewares/auth.middleware");
 
 router.post(
-  "/create",
+  "/",
+  authMiddleware,
   validate(createOrganizationSchema),
   organizationController.createOrganization,
 );
-router.get("/:slug", organizationController.getBySlugOrganization);
-router.get("/", organizationController.getOrganizations);
+router.get("/", authMiddleware, organizationController.getOrganizations);
+router.get(
+  "/:slug",
+  authMiddleware,
+  organizationController.getBySlugOrganization,
+);
+router.put("/:slug", authMiddleware, organizationController.updateOrganization);
+router.patch(
+  "/:slug",
+  authMiddleware,
+  organizationController.updateStatusOrganization,
+);
+router.delete(
+  "/:slug",
+  authMiddleware,
+  organizationController.deleteOrganization,
+);
 
 module.exports = router;
