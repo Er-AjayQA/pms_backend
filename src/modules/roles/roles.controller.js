@@ -14,9 +14,9 @@ const createRole = async (req, res, next) => {
   }
 };
 
-const getBySlugRole = async (req, res, next) => {
+const getByIdRole = async (req, res, next) => {
   try {
-    const data = await roleService.getBySlugRole(req.params);
+    const data = await roleService.getByIdRole(req.params.roleId);
 
     res.status(200).json({
       success: true,
@@ -58,7 +58,7 @@ const updateRole = async (req, res, next) => {
 
 const updateStatusRole = async (req, res, next) => {
   try {
-    const data = await roleService.updateStatusRole(req.params);
+    const data = await roleService.updateStatusRole(req.params.roleId);
 
     res.status(201).json({
       success: true,
@@ -72,7 +72,7 @@ const updateStatusRole = async (req, res, next) => {
 
 const deleteRole = async (req, res, next) => {
   try {
-    const data = await roleService.deleteRole(req.params);
+    const data = await roleService.deleteRole(req.params.roleId);
 
     res.status(201).json({
       success: true,
@@ -86,7 +86,7 @@ const deleteRole = async (req, res, next) => {
 
 module.exports = {
   createRole,
-  getBySlugRole,
+  getByIdRole,
   getRoles,
   updateRole,
   updateStatusRole,

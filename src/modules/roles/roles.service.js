@@ -33,7 +33,11 @@ const createRole = async (orgSlug, { name, description, isSystem }) => {
   const orgData = await getOrgDetails(orgSlug);
 
   const existingData = await Role.findOne({
-    where: { name, organizationId: orgData?.id, deletedAt: null },
+    where: {
+      name,
+      organizationId: isSystem ? null : orgData?.id,
+      deletedAt: null,
+    },
   });
 
   if (existingData) {
@@ -50,16 +54,10 @@ const createRole = async (orgSlug, { name, description, isSystem }) => {
   return data;
 };
 
-const getBySlugRole = async ({ orgSlug, roleId }) => {
-  const orgData = await getOrgDetails(orgSlug);
-
+const getByIdRole = async (roleId) => {
   const existingData = await getRoleDetails({
     id: roleId,
     deletedAt: null,
-    [Op.or]: [
-      { organizationId: orgData?.id },
-      { organizationId: null, isSystem: true },
-    ],
   });
 
   if (!existingData) {
@@ -102,13 +100,8 @@ const updateRole = async (
 
   const existingData = await getRoleDetails({
     id: roleId,
-    organizationId: isSystem ? null : orgData?.id,
     deletedAt: null,
   });
-
-  if (existingData?.isSystem === true && !existingData?.organizationId) {
-    throw createError(400, "System roles can't be updated");
-  }
 
   const checkDuplicate = await Role.findOne({
     where: {
@@ -138,12 +131,9 @@ const updateRole = async (
   return await Role.findByPk(existingData.id);
 };
 
-const updateStatusRole = async ({ orgSlug, roleId }) => {
-  const orgData = await getOrgDetails(orgSlug);
-
+const updateStatusRole = async (roleId) => {
   const existingData = await getRoleDetails({
     id: roleId,
-    organizationId: orgData?.id,
     deletedAt: null,
   });
 
@@ -163,12 +153,9 @@ const updateStatusRole = async ({ orgSlug, roleId }) => {
   return await Role.findByPk(existingData.id);
 };
 
-const deleteRole = async ({ orgSlug, roleId }) => {
-  const orgData = await getOrgDetails(orgSlug);
-
+const deleteRole = async (roleId) => {
   const existingData = await getRoleDetails({
     id: roleId,
-    organizationId: orgData?.id,
     deletedAt: null,
   });
 
@@ -190,7 +177,7 @@ const deleteRole = async ({ orgSlug, roleId }) => {
 
 module.exports = {
   createRole,
-  getBySlugRole,
+  getByIdRole,
   getRoles,
   updateRole,
   updateStatusRole,
