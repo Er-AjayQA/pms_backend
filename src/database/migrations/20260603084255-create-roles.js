@@ -49,6 +49,15 @@ module.exports = {
       },
     });
     await queryInterface.addIndex("roles", ["organizationId"]);
+    await queryInterface.addIndex("roles", ["organizationId", "name"], {
+      unique: true,
+      name: "unique_organization_role",
+    });
+    await queryInterface.addIndex("roles", ["name"], {
+      unique: true,
+      name: "unique_system_role_name",
+      where: { organizationId: null },
+    });
   },
 
   async down(queryInterface) {

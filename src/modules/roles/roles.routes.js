@@ -11,14 +11,14 @@ router.post(
   roleController.createRole,
 );
 router.get("/", authMiddleware, roleController.getRoles);
-router.get("/:slug", authMiddleware, roleController.getBySlugRole);
+router.get("/:roleId", authMiddleware, roleController.getBySlugRole);
 router.put(
-  "/:slug",
+  "/:roleId",
   authMiddleware,
   validate(updateRoleSchema),
   roleController.updateRole,
 );
-router.patch("/:slug", authMiddleware, roleController.updateStatusRole);
-router.delete("/:slug", authMiddleware, roleController.deleteRole);
+router.patch("/:roleId", authMiddleware, roleController.updateStatusRole);
+router.delete("/:roleId", authMiddleware, roleController.deleteRole);
 
 module.exports = router;

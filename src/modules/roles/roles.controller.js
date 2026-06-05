@@ -7,7 +7,7 @@ const createRole = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Data created successfully",
-      data: { data },
+      data: data,
     });
   } catch (error) {
     next(error);
@@ -30,7 +30,7 @@ const getBySlugRole = async (req, res, next) => {
 
 const getRoles = async (req, res, next) => {
   try {
-    const dataList = await roleService.getRoles();
+    const dataList = await roleService.getRoles(req.params);
 
     res.status(200).json({
       success: true,
@@ -49,7 +49,7 @@ const updateRole = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: "Data updated successfully",
-      data: { data },
+      data: data,
     });
   } catch (error) {
     next(error);
@@ -58,7 +58,7 @@ const updateRole = async (req, res, next) => {
 
 const updateStatusRole = async (req, res, next) => {
   try {
-    const data = await roleService.updateStatusRole(req.params.slug);
+    const data = await roleService.updateStatusRole(req.params);
 
     res.status(201).json({
       success: true,
@@ -72,7 +72,7 @@ const updateStatusRole = async (req, res, next) => {
 
 const deleteRole = async (req, res, next) => {
   try {
-    const data = await roleService.deleteRole(req.params.slug);
+    const data = await roleService.deleteRole(req.params);
 
     res.status(201).json({
       success: true,

@@ -15,10 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
-      slug: {
-        type: DataTypes.STRING(300),
-        allowNull: false,
-      },
       description: {
         type: DataTypes.STRING,
         allowNull: true,

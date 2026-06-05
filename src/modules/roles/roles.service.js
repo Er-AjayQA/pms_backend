@@ -16,9 +16,9 @@ const getOrgDetails = async (orgSlug) => {
   return orgData;
 };
 
-const getRoleDetails = async (slug, orgId) => {
+const getRoleDetails = async (whereCondition) => {
   const data = await Role.findOne({
-    where: { slug, organizationId: orgId, deletedAt: null },
+    where: whereCondition,
   });
 
   if (!data) {
@@ -32,20 +32,17 @@ const getRoleDetails = async (slug, orgId) => {
 const createRole = async (orgSlug, { name, description, isSystem }) => {
   const orgData = await getOrgDetails(orgSlug);
 
-  const roleSlug = generateSlug(name);
-
   const existingData = await Role.findOne({
-    where: { slug: roleSlug, organizationId: orgData?.id, deletedAt: null },
+    where: { name, organizationId: orgData?.id, deletedAt: null },
   });
 
   if (existingData) {
-    throw createError(409, "Role slug already exists");
+    throw createError(409, "Role name already exists");
   }
 
   const data = await Role.create({
-    organizationId: orgData?.id,
+    organizationId: isSystem ? null : orgData?.id,
     name,
-    slug: roleSlug,
     description,
     isSystem,
   });
@@ -53,18 +50,16 @@ const createRole = async (orgSlug, { name, description, isSystem }) => {
   return data;
 };
 
-const getBySlugRole = async ({ orgSlug, slug }) => {
+const getBySlugRole = async ({ orgSlug, roleId }) => {
   const orgData = await getOrgDetails(orgSlug);
 
-  const existingData = await Role.findOne({
-    where: {
-      slug,
-      deletedAt: null,
-      [Op.or]: [
-        { organizationId: orgData?.id },
-        { organizationId: null, isSystem: true },
-      ],
-    },
+  const existingData = await getRoleDetails({
+    id: roleId,
+    deletedAt: null,
+    [Op.or]: [
+      { organizationId: orgData?.id },
+      { organizationId: null, isSystem: true },
+    ],
   });
 
   if (!existingData) {
@@ -74,7 +69,7 @@ const getBySlugRole = async ({ orgSlug, slug }) => {
   return existingData;
 };
 
-const getRoles = async (orgSlug) => {
+const getRoles = async ({ orgSlug }) => {
   const orgData = await getOrgDetails(orgSlug);
 
   const dataList = await Role.findAll({
@@ -82,7 +77,7 @@ const getRoles = async (orgSlug) => {
       deletedAt: null,
       [Op.or]: [
         {
-          organizationId: org.id,
+          organizationId: orgData.id,
         },
         {
           organizationId: null,
@@ -100,43 +95,40 @@ const getRoles = async (orgSlug) => {
 };
 
 const updateRole = async (
-  { orgSlug, slug },
-  { organizationId, name, description, isSystem, status },
+  { orgSlug, roleId },
+  { name, description, isSystem },
 ) => {
   const orgData = await getOrgDetails(orgSlug);
 
-  const existingData = await getRoleDetails(slug, orgData?.id);
+  const existingData = await getRoleDetails({
+    id: roleId,
+    organizationId: isSystem ? null : orgData?.id,
+    deletedAt: null,
+  });
 
-  if (!existingData) {
-    throw createError(409, "Data not found");
+  if (existingData?.isSystem === true && !existingData?.organizationId) {
+    throw createError(400, "System roles can't be updated");
   }
 
-  const isNameChange = name && existingData?.name !== name;
+  const checkDuplicate = await Role.findOne({
+    where: {
+      name,
+      organizationId: orgData?.id,
+      id: { [Op.ne]: existingData?.id },
+      deletedAt: null,
+    },
+  });
 
-  const newSlug = isNameChange ? generateSlug(name) : existingData?.slug;
-
-  if (isNameChange) {
-    const checkNewSlug = await Role.findOne({
-      where: {
-        slug: newSlug,
-        organizationId: orgData?.id,
-        id: { [Op.ne]: existingData.id },
-      },
-    });
-
-    if (checkNewSlug) {
-      throw createError(409, "Name already exists");
-    }
+  if (checkDuplicate) {
+    throw createError(409, "Name already exists");
   }
 
   await Role.update(
     {
-      Name,
-      organizationId,
-      slug: newSlug,
+      name,
+      organizationId: isSystem ? null : existingData?.organizationId,
       description,
       isSystem,
-      status,
     },
     {
       where: { id: existingData.id },
@@ -146,9 +138,13 @@ const updateRole = async (
   return await Role.findByPk(existingData.id);
 };
 
-const updateStatusRole = async (slug) => {
-  const existingData = await Role.findOne({
-    where: { slug, deletedAt: null },
+const updateStatusRole = async ({ orgSlug, roleId }) => {
+  const orgData = await getOrgDetails(orgSlug);
+
+  const existingData = await getRoleDetails({
+    id: roleId,
+    organizationId: orgData?.id,
+    deletedAt: null,
   });
 
   if (!existingData) {
@@ -167,9 +163,13 @@ const updateStatusRole = async (slug) => {
   return await Role.findByPk(existingData.id);
 };
 
-const deleteRole = async (slug) => {
-  const existingData = await Role.findOne({
-    where: { slug, deletedAt: null },
+const deleteRole = async ({ orgSlug, roleId }) => {
+  const orgData = await getOrgDetails(orgSlug);
+
+  const existingData = await getRoleDetails({
+    id: roleId,
+    organizationId: orgData?.id,
+    deletedAt: null,
   });
 
   if (!existingData) {

@@ -8,7 +8,6 @@ module.exports = {
       {
         id: uuidv4(),
         name: "Owner",
-        slug: "owner",
         description: "This represents the owner of the organization.",
         isSystem: true,
         status: "active",
@@ -18,7 +17,6 @@ module.exports = {
       {
         id: uuidv4(),
         name: "Admin",
-        slug: "admin",
         description: "",
         isSystem: true,
         status: "active",
@@ -28,7 +26,6 @@ module.exports = {
       {
         id: uuidv4(),
         name: "Member",
-        slug: "member",
         description: "",
         isSystem: true,
         status: "active",
@@ -38,7 +35,6 @@ module.exports = {
       {
         id: uuidv4(),
         name: "Viewer",
-        slug: "viewer",
         description: "",
         isSystem: true,
         status: "active",

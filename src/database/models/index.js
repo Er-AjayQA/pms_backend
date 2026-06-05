@@ -28,10 +28,6 @@ db.Organization = require("../../modules/organizations/organization.model")(
   sequelize,
   Sequelize.DataTypes,
 );
-// db.Permission = require("../../modules/permissions/permissions.model")(
-//   sequelize,
-//   Sequelize.DataTypes,
-// );
 db.Role = require("../../modules/roles/roles.model")(
   sequelize,
   Sequelize.DataTypes,
