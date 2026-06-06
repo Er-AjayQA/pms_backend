@@ -16,5 +16,15 @@ router.get(
   authMiddleware,
   invitationController.getByIdInvitation,
 );
+router.patch(
+  "/:inviteId/revoke",
+  authMiddleware,
+  invitationController.revokeInvitation,
+);
+router.delete(
+  "/:inviteId/delete",
+  authMiddleware,
+  invitationController.deleteInvitation,
+);
 
 module.exports = router;

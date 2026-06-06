@@ -45,8 +45,38 @@ const getByIdInvitation = async (req, res, next) => {
   }
 };
 
+const revokeInvitation = async (req, res, next) => {
+  try {
+    const data = await invitationService.revokeInvitation(req.params.inviteId);
+
+    res.status(201).json({
+      success: true,
+      message: "Invitation revoked successfully",
+      data: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteInvitation = async (req, res, next) => {
+  try {
+    const data = await invitationService.deleteInvitation(req.params.inviteId);
+
+    res.status(200).json({
+      success: true,
+      message: "Invitation deleted successfully",
+      data: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createInvitation,
   getInvitations,
   getByIdInvitation,
+  revokeInvitation,
+  deleteInvitation,
 };

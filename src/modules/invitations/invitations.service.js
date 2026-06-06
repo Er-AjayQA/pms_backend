@@ -9,6 +9,7 @@ const { Op } = require("sequelize");
 const crypto = require("crypto");
 const env = require("../../config/env");
 const { hashToken, getOrgDetails } = require("../../utils/helpers");
+const sendMail = require("../../config/mailer");
 
 const createInvitation = async (orgSlug, { email, roleId }) => {
   const existingOrg = await getOrgDetails(orgSlug);
@@ -23,13 +24,22 @@ const createInvitation = async (orgSlug, { email, roleId }) => {
   });
 
   if (existingInvitation) {
-    throw createError.Conflict("An invitation already exists for this email.");
+    throw createError(409, "An invitation already exists for this email.");
   }
 
   const token = crypto.randomBytes(32).toString("hex");
   const hashedToken = hashToken(token);
 
   const inviteLink = `${env.CLIENT_URL}/invitations/${token}`;
+
+  await sendMail({
+    to: email,
+    subject: "You have been invited to join an organization",
+    html: `
+      <p>You have been invited to join the organization.</p>
+      <p><a href="${inviteLink}">Accept Invitation</a></p>
+    `,
+  });
 
   const invitation = await Invitation.create({
     organizationId: existingOrg.id,
@@ -76,8 +86,66 @@ const getByIdInvitation = async ({ orgSlug, inviteId }) => {
   return dataList;
 };
 
+const revokeInvitation = async (inviteId) => {
+  const existingInvitation = await Invitation.findOne({
+    where: {
+      id: inviteId,
+      deletedAt: null,
+    },
+  });
+
+  if (!existingInvitation) {
+    throw createError(404, "Data not found.");
+  }
+
+  await Invitation.update(
+    {
+      status: "revoked",
+    },
+    {
+      where: {
+        id: inviteId,
+      },
+    },
+  );
+
+  const invitation = await Invitation.findByPk(inviteId);
+
+  return invitation;
+};
+
+const deleteInvitation = async (inviteId) => {
+  const existingInvitation = await Invitation.findOne({
+    where: {
+      id: inviteId,
+      deletedAt: null,
+    },
+  });
+
+  if (!existingInvitation) {
+    throw createError(404, "Data not found.");
+  }
+
+  await Invitation.update(
+    {
+      deletedAt: new Date(),
+    },
+    {
+      where: {
+        id: inviteId,
+      },
+    },
+  );
+
+  const invitation = await Invitation.findByPk(inviteId);
+
+  return invitation;
+};
+
 module.exports = {
   createInvitation,
   getInvitations,
   getByIdInvitation,
+  revokeInvitation,
+  deleteInvitation,
 };

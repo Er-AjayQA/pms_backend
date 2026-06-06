@@ -26,6 +26,12 @@ const envSchema = z.object({
 
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z.coerce.number().default(6379),
+
+  SMTP_HOST: z.string().default("smtp.gmail.com"),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_USER: z.string().email(),
+  SMTP_PASS: z.string(),
+  MAIL_FROM: z.string().email(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
