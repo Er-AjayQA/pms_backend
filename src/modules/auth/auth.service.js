@@ -2,13 +2,10 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const createError = require("http-errors");
+const { hashToken } = require("../../utils/helpers");
 
 const env = require("../../config/env");
 const { User, RefreshToken, sequelize } = require("../../database/models");
-
-const hashToken = (token) => {
-  return crypto.createHash("sha256").update(token).digest("hex");
-};
 
 const generateAccessToken = (user) => {
   return jwt.sign(

@@ -4,6 +4,8 @@ const validate = require("../../middlewares/validate.middleware");
 const { createOrganizationSchema } = require("./organization.validation");
 const authMiddleware = require("../../middlewares/auth.middleware");
 const rolesRoutes = require("../roles/roles.routes");
+const memberRoutes = require("../organizationMembers/organizationMembers.routes");
+const invitationRoutes = require("../invitations/invitations.routes");
 
 router.post(
   "/",
@@ -29,7 +31,9 @@ router.delete(
   organizationController.deleteOrganization,
 );
 
-// Roles Routes
+// Other Routes
 router.use("/:orgSlug/roles", rolesRoutes);
+router.use("/:orgSlug/members", memberRoutes);
+router.use("/:orgSlug/invitations", invitationRoutes);
 
 module.exports = router;

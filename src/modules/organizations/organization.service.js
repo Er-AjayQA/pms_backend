@@ -1,7 +1,8 @@
-const { Organization } = require("../../database/models");
+const { Organization, OrganizationMember } = require("../../database/models");
 const createError = require("http-errors");
 const generateSlug = require("../../utils/generateSlug");
 const { Op } = require("sequelize");
+const { getRoleDetails } = require("../../utils/helpers");
 
 const createOrganization = async ({ name, ownerId, logoUrl }) => {
   const slug = generateSlug(name);
@@ -18,6 +19,17 @@ const createOrganization = async ({ name, ownerId, logoUrl }) => {
     slug,
     ownerId,
     logoUrl,
+  });
+
+  const ownerRole = await getRoleDetails({
+    name: "Owner",
+  });
+
+  const registerAsMember = await OrganizationMember.create({
+    organizationId: organization.id,
+    userId: ownerId,
+    roleId: ownerRole.id,
+    joinedAt: new Date(),
   });
 
   return organization;

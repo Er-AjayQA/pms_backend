@@ -32,6 +32,15 @@ db.Role = require("../../modules/roles/roles.model")(
   sequelize,
   Sequelize.DataTypes,
 );
+db.OrganizationMember =
+  require("../../modules/organizationMembers/organizationMembers.model")(
+    sequelize,
+    Sequelize.DataTypes,
+  );
+db.Invitation = require("../../modules/invitations/invitations.model")(
+  sequelize,
+  Sequelize.DataTypes,
+);
 
 // User & Refresh Token tables associations
 db.User.hasMany(db.RefreshToken, {
@@ -61,6 +70,56 @@ db.Organization.hasMany(db.Role, {
 db.Role.belongsTo(db.Organization, {
   foreignKey: "organizationId",
   as: "organization",
+});
+
+// Organization & Organization Member tables associations
+db.Organization.hasMany(db.OrganizationMember, {
+  foreignKey: "organizationId",
+  as: "members",
+});
+db.OrganizationMember.belongsTo(db.Organization, {
+  foreignKey: "organizationId",
+  as: "organization",
+});
+
+// User & Organization Member tables associations
+db.User.hasMany(db.OrganizationMember, {
+  foreignKey: "userId",
+  as: "organizationMemberships",
+});
+db.OrganizationMember.belongsTo(db.User, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+// Role & Organization Member tables associations
+db.Role.hasMany(db.OrganizationMember, {
+  foreignKey: "roleId",
+  as: "members",
+});
+db.OrganizationMember.belongsTo(db.Role, {
+  foreignKey: "roleId",
+  as: "role",
+});
+
+// Organization & Invitation tables associations
+db.Organization.hasMany(db.Invitation, {
+  foreignKey: "organizationId",
+  as: "invitations",
+});
+db.Invitation.belongsTo(db.Organization, {
+  foreignKey: "organizationId",
+  as: "organization",
+});
+
+// Role & Invitation tables associations
+db.Role.hasMany(db.Invitation, {
+  foreignKey: "roleId",
+  as: "invitations",
+});
+db.Invitation.belongsTo(db.Role, {
+  foreignKey: "roleId",
+  as: "role",
 });
 
 module.exports = db;
