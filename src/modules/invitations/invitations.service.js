@@ -5,10 +5,7 @@ const {
   Invitation,
 } = require("../../database/models");
 const createError = require("http-errors");
-const generateSlug = require("../../utils/generateSlug");
 const { Op } = require("sequelize");
-const { getRoleDetails } = require("../../utils/helpers");
-const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const env = require("../../config/env");
 const { hashToken, getOrgDetails } = require("../../utils/helpers");
@@ -16,8 +13,23 @@ const { hashToken, getOrgDetails } = require("../../utils/helpers");
 const createInvitation = async (orgSlug, { email, roleId }) => {
   const existingOrg = await getOrgDetails(orgSlug);
 
+  const existingInvitation = await Invitation.findOne({
+    where: {
+      email,
+      organizationId: existingOrg?.id,
+      deletedAt: null,
+      status: { [Op.in]: ["pending", "accepted"] },
+    },
+  });
+
+  if (existingInvitation) {
+    throw createError.Conflict("An invitation already exists for this email.");
+  }
+
   const token = crypto.randomBytes(32).toString("hex");
   const hashedToken = hashToken(token);
+
+  const inviteLink = `${env.CLIENT_URL}/invitations/${token}`;
 
   const invitation = await Invitation.create({
     organizationId: existingOrg.id,

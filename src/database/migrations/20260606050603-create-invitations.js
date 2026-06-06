@@ -65,7 +65,6 @@ module.exports = {
     });
     await queryInterface.addIndex("invitations", ["organizationId"]);
     await queryInterface.addIndex("invitations", ["organizationId", "email"], {
-      unique: true,
       name: "unique_organization_email",
     });
   },
