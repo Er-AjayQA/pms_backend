@@ -1,6 +1,5 @@
 "use strict";
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("invitations", {
@@ -9,11 +8,11 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
-      organizationId: {
+      projectId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "organizations",
+          model: "projects",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -63,9 +62,9 @@ module.exports = {
         allowNull: true,
       },
     });
-    await queryInterface.addIndex("invitations", ["organizationId"]);
-    await queryInterface.addIndex("invitations", ["organizationId", "email"], {
-      name: "unique_organization_email",
+    await queryInterface.addIndex("invitations", ["projectId"]);
+    await queryInterface.addIndex("invitations", ["projectId", "email"], {
+      name: "unique_project_email",
     });
   },
 

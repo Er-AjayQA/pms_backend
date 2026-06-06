@@ -2,7 +2,7 @@ const roleService = require("./roles.service");
 
 const createRole = async (req, res, next) => {
   try {
-    const data = await roleService.createRole(req.params.orgSlug, req.body);
+    const data = await roleService.createRole(req.params.slug, req.body);
 
     res.status(201).json({
       success: true,

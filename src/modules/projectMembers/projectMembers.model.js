@@ -1,13 +1,13 @@
 module.exports = (sequelize, DataTypes) => {
-  const OrganizationMember = sequelize.define(
-    "OrganizationMember",
+  const ProjectMember = sequelize.define(
+    "ProjectMember",
     {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      organizationId: {
+      projectId: {
         type: DataTypes.UUID,
         allowNull: false,
       },
@@ -30,11 +30,11 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "Organization_Members",
+      tableName: "Project_Members",
       paranoid: true,
       timestamps: true,
     },
   );
 
-  return OrganizationMember;
+  return ProjectMember;
 };

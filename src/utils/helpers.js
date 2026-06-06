@@ -7,16 +7,14 @@ const hashToken = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
 };
 
-const getOrgDetails = async (orgSlug) => {
-  const orgData = await Organization.findOne({
-    where: { slug: orgSlug, deletedAt: null },
-  });
+const getProjectDetails = async (whereCondition) => {
+  const data = await Project.findOne(whereCondition);
 
-  if (!orgData) {
-    throw createError(404, "Organization not found");
+  if (!data) {
+    throw createError(404, "Project not found");
   }
 
-  return orgData;
+  return data;
 };
 
 const getRoleDetails = async (whereCondition) => {
@@ -31,4 +29,4 @@ const getRoleDetails = async (whereCondition) => {
   return data;
 };
 
-module.exports = { hashToken, getOrgDetails, getRoleDetails };
+module.exports = { hashToken, getProjectDetails, getRoleDetails };

@@ -1,87 +1,26 @@
-const { Organization, Role } = require("../../database/models");
+const { Project, Role } = require("../../database/models");
 const createError = require("http-errors");
 const generateSlug = require("../../utils/generateSlug");
 const { Op, where } = require("sequelize");
-
-// HELPER FUNCTIONS
-const getOrgDetails = async (orgSlug) => {
-  const orgData = await Organization.findOne({
-    where: { slug: orgSlug, deletedAt: null },
-  });
-
-  if (!orgData) {
-    throw createError(404, "Organization not found");
-  }
-
-  return orgData;
-};
-
-const getRoleDetails = async (whereCondition) => {
-  const data = await Role.findOne({
-    where: whereCondition,
-  });
-
-  if (!data) {
-    throw createError(404, "Role not found");
-  }
-
-  return data;
-};
-
-// SERVICES
-const createRole = async (orgSlug, { name, description, isSystem }) => {
-  const orgData = await getOrgDetails(orgSlug);
-
-  const existingData = await Role.findOne({
-    where: {
-      name,
-      organizationId: isSystem ? null : orgData?.id,
-      deletedAt: null,
-    },
-  });
-
-  if (existingData) {
-    throw createError(409, "Role name already exists");
-  }
-
-  const data = await Role.create({
-    organizationId: isSystem ? null : orgData?.id,
-    name,
-    description,
-    isSystem,
-  });
-
-  return data;
-};
+const { getProjectDetails, getRoleDetails } = require("../../utils/helpers");
+const projectService = require("../projects/projects.service");
 
 const getByIdRole = async (roleId) => {
-  const existingData = await getRoleDetails({
-    id: roleId,
-    deletedAt: null,
-  });
+  const existingData = await Role({ where: { id: roleId, deletedAt: null } });
 
   if (!existingData) {
-    throw createError(404, "Data not found");
+    throw createError(404, "Role not found");
   }
 
   return existingData;
 };
 
-const getRoles = async ({ orgSlug }) => {
-  const orgData = await getOrgDetails(orgSlug);
+const getRoles = async ({ slug }) => {
+  const projData = await getProjectDetails(slug);
 
   const dataList = await Role.findAll({
     where: {
       deletedAt: null,
-      [Op.or]: [
-        {
-          organizationId: orgData.id,
-        },
-        {
-          organizationId: null,
-          isSystem: true,
-        },
-      ],
     },
   });
 
@@ -92,36 +31,50 @@ const getRoles = async ({ orgSlug }) => {
   return dataList;
 };
 
-const updateRole = async (
-  { orgSlug, roleId },
-  { name, description, isSystem },
-) => {
-  const orgData = await getOrgDetails(orgSlug);
+const createRole = async (slug, { name, description }) => {
+  const projData = await projectService.getBySlugProject(slug);
 
-  const existingData = await getRoleDetails({
-    id: roleId,
-    deletedAt: null,
+  const existingData = await Role.findOne({
+    where: {
+      name,
+      deletedAt: null,
+    },
   });
+
+  if (existingData) {
+    throw createError(409, "Role name already exists");
+  }
+
+  const data = await Role.create({
+    name,
+    description,
+  });
+
+  return data;
+};
+
+const updateRole = async ({ slug, roleId }, { name, description, status }) => {
+  const projData = await projectService.getBySlugProject(slug);
+
+  const existingData = await getByIdRole(roleId);
 
   const checkDuplicate = await Role.findOne({
     where: {
       name,
-      organizationId: orgData?.id,
       id: { [Op.ne]: existingData?.id },
       deletedAt: null,
     },
   });
 
   if (checkDuplicate) {
-    throw createError(409, "Name already exists");
+    throw createError(409, "Role Name already exists");
   }
 
   await Role.update(
     {
       name,
-      organizationId: isSystem ? null : existingData?.organizationId,
       description,
-      isSystem,
+      status,
     },
     {
       where: { id: existingData.id },
@@ -132,14 +85,7 @@ const updateRole = async (
 };
 
 const updateStatusRole = async (roleId) => {
-  const existingData = await getRoleDetails({
-    id: roleId,
-    deletedAt: null,
-  });
-
-  if (!existingData) {
-    throw createError(409, "Role not found");
-  }
+  const existingData = await getByIdRole(roleId);
 
   await Role.update(
     {
@@ -154,14 +100,7 @@ const updateStatusRole = async (roleId) => {
 };
 
 const deleteRole = async (roleId) => {
-  const existingData = await getRoleDetails({
-    id: roleId,
-    deletedAt: null,
-  });
-
-  if (!existingData) {
-    throw createError(409, "Data not found");
-  }
+  const existingData = await getByIdRole(roleId);
 
   await Role.update(
     {

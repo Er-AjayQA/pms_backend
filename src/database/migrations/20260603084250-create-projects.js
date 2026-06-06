@@ -1,13 +1,20 @@
 "use strict";
 
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("organizations", {
+    await queryInterface.createTable("projects", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
+      },
+      ownerId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "users",
+          key: "id",
+        },
       },
       name: {
         type: Sequelize.STRING(250),
@@ -18,21 +25,21 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
-      ownerId: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: "users",
-          key: "id",
-        },
-      },
-      logoUrl: {
-        type: Sequelize.STRING,
+      description: {
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       status: {
         type: Sequelize.ENUM("active", "inactive"),
         defaultValue: "active",
+      },
+      startDate: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      endDate: {
+        allowNull: false,
+        type: Sequelize.DATE,
       },
       createdAt: {
         allowNull: false,
@@ -47,11 +54,11 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
-    await queryInterface.addIndex("organizations", ["ownerId"]);
-    await queryInterface.addIndex("organizations", ["slug"], { unique: true });
+    await queryInterface.addIndex("projects", ["ownerId"]);
+    await queryInterface.addIndex("projects", ["slug"], { unique: true });
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("organizations");
+    await queryInterface.dropTable("projects");
   },
 };

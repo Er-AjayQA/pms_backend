@@ -1,11 +1,15 @@
 module.exports = (sequelize, DataTypes) => {
-  const Organization = sequelize.define(
-    "Organization",
+  const Project = sequelize.define(
+    "Project",
     {
       id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
+      },
+      ownerId: {
+        type: DataTypes.UUID,
+        allowNull: false,
       },
       name: {
         type: DataTypes.STRING(250),
@@ -16,9 +20,9 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
-      ownerId: {
-        type: DataTypes.UUID,
-        allowNull: false,
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
       },
       logoUrl: {
         type: DataTypes.STRING,
@@ -28,13 +32,21 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("active", "inactive"),
         defaultValue: "active",
       },
+      startDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      endDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
     },
     {
-      tableName: "Organizations",
+      tableName: "Projects",
       paranoid: true,
       timestamps: true,
     },
   );
 
-  return Organization;
+  return Project;
 };

@@ -24,7 +24,7 @@ db.RefreshToken = require("../../modules/auth/refresh-token.model")(
   sequelize,
   Sequelize.DataTypes,
 );
-db.Organization = require("../../modules/organizations/organization.model")(
+db.Project = require("../../modules/projects/projects.model")(
   sequelize,
   Sequelize.DataTypes,
 );
@@ -32,11 +32,10 @@ db.Role = require("../../modules/roles/roles.model")(
   sequelize,
   Sequelize.DataTypes,
 );
-db.OrganizationMember =
-  require("../../modules/organizationMembers/organizationMembers.model")(
-    sequelize,
-    Sequelize.DataTypes,
-  );
+db.ProjectMember = require("../../modules/projectMembers/projectMembers.model")(
+  sequelize,
+  Sequelize.DataTypes,
+);
 db.Invitation = require("../../modules/invitations/invitations.model")(
   sequelize,
   Sequelize.DataTypes,
@@ -52,63 +51,53 @@ db.RefreshToken.belongsTo(db.User, {
   as: "user",
 });
 
-// User & Organization tables associations
-db.User.hasMany(db.Organization, {
+// User & Project tables associations
+db.User.hasMany(db.Project, {
   foreignKey: "ownerId",
-  as: "organizations",
+  as: "projects",
 });
-db.Organization.belongsTo(db.User, {
+db.Project.belongsTo(db.User, {
   foreignKey: "ownerId",
   as: "owner",
 });
 
-// Role & Organization tables associations
-db.Organization.hasMany(db.Role, {
-  foreignKey: "organizationId",
-  as: "roles",
-});
-db.Role.belongsTo(db.Organization, {
-  foreignKey: "organizationId",
-  as: "organization",
-});
-
-// Organization & Organization Member tables associations
-db.Organization.hasMany(db.OrganizationMember, {
-  foreignKey: "organizationId",
+// Project & Project Member tables associations
+db.Project.hasMany(db.ProjectMember, {
+  foreignKey: "projectId",
   as: "members",
 });
-db.OrganizationMember.belongsTo(db.Organization, {
-  foreignKey: "organizationId",
-  as: "organization",
+db.ProjectMember.belongsTo(db.Project, {
+  foreignKey: "projectId",
+  as: "project",
 });
 
-// User & Organization Member tables associations
-db.User.hasMany(db.OrganizationMember, {
+// User & Project Member tables associations
+db.User.hasMany(db.ProjectMember, {
   foreignKey: "userId",
-  as: "organizationMemberships",
+  as: "ProjectMemberships",
 });
-db.OrganizationMember.belongsTo(db.User, {
+db.ProjectMember.belongsTo(db.User, {
   foreignKey: "userId",
   as: "user",
 });
 
-// Role & Organization Member tables associations
-db.Role.hasMany(db.OrganizationMember, {
+// Role & Project Member tables associations
+db.Role.hasMany(db.ProjectMember, {
   foreignKey: "roleId",
   as: "members",
 });
-db.OrganizationMember.belongsTo(db.Role, {
+db.ProjectMember.belongsTo(db.Role, {
   foreignKey: "roleId",
   as: "role",
 });
 
-// Organization & Invitation tables associations
-db.Organization.hasMany(db.Invitation, {
-  foreignKey: "organizationId",
+// Project & Invitation tables associations
+db.Project.hasMany(db.Invitation, {
+  foreignKey: "projectId",
   as: "invitations",
 });
-db.Invitation.belongsTo(db.Organization, {
-  foreignKey: "organizationId",
+db.Invitation.belongsTo(db.Project, {
+  foreignKey: "projectId",
   as: "organization",
 });
 

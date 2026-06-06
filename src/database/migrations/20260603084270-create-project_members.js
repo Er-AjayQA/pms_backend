@@ -2,18 +2,18 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("organization_members", {
+    await queryInterface.createTable("project_members", {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true,
       },
 
-      organizationId: {
+      projectId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: "organizations",
+          model: "projects",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -42,15 +42,15 @@ module.exports = {
         onDelete: "RESTRICT",
       },
 
+      joinedAt: {
+        type: Sequelize.DATE,
+        allowNull: true,
+      },
+
       status: {
         type: Sequelize.ENUM("active", "invited", "removed"),
         allowNull: false,
         defaultValue: "active",
-      },
-
-      joinedAt: {
-        type: Sequelize.DATE,
-        allowNull: true,
       },
 
       createdAt: {
@@ -69,21 +69,17 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex("organization_members", ["organizationId"]);
-    await queryInterface.addIndex("organization_members", ["userId"]);
-    await queryInterface.addIndex("organization_members", ["roleId"]);
+    await queryInterface.addIndex("project_members", ["projectId"]);
+    await queryInterface.addIndex("project_members", ["userId"]);
+    await queryInterface.addIndex("project_members", ["roleId"]);
 
-    await queryInterface.addIndex(
-      "organization_members",
-      ["organizationId", "userId"],
-      {
-        unique: true,
-        name: "unique_organization_member",
-      },
-    );
+    await queryInterface.addIndex("project_members", ["projectId", "userId"], {
+      unique: true,
+      name: "unique_project_member",
+    });
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("organization_members");
+    await queryInterface.dropTable("project_members");
   },
 };

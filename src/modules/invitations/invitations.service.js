@@ -1,7 +1,7 @@
 const {
   User,
-  Organization,
-  OrganizationMember,
+  Project,
+  ProjectMember,
   Role,
   Invitation,
 } = require("../../database/models");
@@ -11,6 +11,7 @@ const crypto = require("crypto");
 const env = require("../../config/env");
 const { hashToken, getOrgDetails } = require("../../utils/helpers");
 const sendMail = require("../../config/mailer");
+const projectService = require("../projects/projects.service");
 
 // Helper Function
 const checkExpiry = (expiryDate) => {
@@ -19,13 +20,47 @@ const checkExpiry = (expiryDate) => {
 };
 
 // Service Functions
-const createInvitation = async (orgSlug, { email, roleId }) => {
-  const existingOrg = await getOrgDetails(orgSlug);
+const getInvitations = async ({ slug }) => {
+  const existingProject = await projectService.getBySlugProject(slug);
+
+  const dataList = await Invitation.findAll({
+    where: {
+      projectId: existingProject.id,
+      deletedAt: null,
+    },
+    include: [
+      {
+        model: Role,
+        as: "role",
+      },
+    ],
+  });
+
+  return dataList;
+};
+
+const getByIdInvitation = async ({ slug, inviteId }) => {
+  const existingProject = await projectService.getBySlugProject(slug);
+
+  const dataList = await Invitation.findByPk(inviteId, {
+    include: [
+      {
+        model: Role,
+        as: "role",
+      },
+    ],
+  });
+
+  return dataList;
+};
+
+const createInvitation = async (slug, { email, roleId }) => {
+  const existingProject = await projectService.getBySlugProject(slug);
 
   const existingInvitation = await Invitation.findOne({
     where: {
       email,
-      organizationId: existingOrg?.id,
+      projectId: existingProject?.id,
       deletedAt: null,
       status: { [Op.in]: ["pending", "accepted"] },
     },
@@ -42,15 +77,15 @@ const createInvitation = async (orgSlug, { email, roleId }) => {
 
   await sendMail({
     to: email,
-    subject: "You have been invited to join an organization",
+    subject: "You have been invited to join the project",
     html: `
-      <p>You have been invited to join the organization.</p>
+      <p>You have been invited to join the project.</p>
       <p><a href="${inviteLink}">Accept Invitation</a></p>
     `,
   });
 
   const invitation = await Invitation.create({
-    organizationId: existingOrg.id,
+    projectId: existingProject.id,
     roleId,
     email,
     tokenHash: hashedToken,
@@ -60,8 +95,8 @@ const createInvitation = async (orgSlug, { email, roleId }) => {
   return invitation;
 };
 
-const resendInvitation = async ({ orgSlug, inviteId }) => {
-  const existingOrg = await getOrgDetails(orgSlug);
+const resendInvitation = async ({ slug, inviteId }) => {
+  const existingProject = await projectService.getBySlugProject(slug);
 
   const invitation = await Invitation.findByPk(inviteId, {
     where: {
@@ -88,48 +123,14 @@ const resendInvitation = async ({ orgSlug, inviteId }) => {
 
   await sendMail({
     to: invitation.email,
-    subject: "You have been invited to join an organization",
+    subject: "You have been invited to join the project",
     html: `
-      <p>You have been invited to join the organization.</p>
+      <p>You have been invited to join the project.</p>
       <p><a href="${inviteLink}">Accept Invitation</a></p>
     `,
   });
 
   return invitation;
-};
-
-const getInvitations = async (orgSlug) => {
-  const existingOrg = await getOrgDetails(orgSlug);
-
-  const dataList = await Invitation.findAll({
-    where: {
-      organizationId: existingOrg.id,
-      deletedAt: null,
-    },
-    include: [
-      {
-        model: Role,
-        as: "role",
-      },
-    ],
-  });
-
-  return dataList;
-};
-
-const getByIdInvitation = async ({ orgSlug, inviteId }) => {
-  const existingOrg = await getOrgDetails(orgSlug);
-
-  const dataList = await Invitation.findByPk(inviteId, {
-    include: [
-      {
-        model: Role,
-        as: "role",
-      },
-    ],
-  });
-
-  return dataList;
 };
 
 const revokeInvitation = async (inviteId) => {
@@ -188,15 +189,15 @@ const deleteInvitation = async (inviteId) => {
   return invitation;
 };
 
-const acceptInvitation = async ({ orgSlug, token }) => {
-  const existingOrg = await getOrgDetails(orgSlug);
+const acceptInvitation = async ({ slug, token }) => {
+  const existingProject = await projectService.getBySlugProject(slug);
   const tokenHash = hashToken(token);
   let data = null;
 
   const existingInvitation = await Invitation.findOne({
     where: {
       tokenHash,
-      organizationId: existingOrg?.id,
+      projectId: existingProject?.id,
       deletedAt: null,
       status: { [Op.in]: ["pending"] },
     },
@@ -223,8 +224,8 @@ const acceptInvitation = async ({ orgSlug, token }) => {
     throw createError(403, "This invitation is not for your account.");
   }
 
-  data = await OrganizationMember.create({
-    organizationId: existingInvitation.organizationId,
+  data = await ProjectMember.create({
+    projectId: existingInvitation.projectId,
     userId: userExist.id,
     roleId: existingInvitation.roleId,
   });
