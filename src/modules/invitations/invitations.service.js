@@ -1,6 +1,7 @@
 const {
   Organization,
   OrganizationMember,
+  Role,
   Invitation,
 } = require("../../database/models");
 const createError = require("http-errors");
@@ -29,6 +30,42 @@ const createInvitation = async (orgSlug, { email, roleId }) => {
   return invitation;
 };
 
+const getInvitations = async (orgSlug) => {
+  const existingOrg = await getOrgDetails(orgSlug);
+
+  const dataList = await Invitation.findAll({
+    where: {
+      organizationId: existingOrg.id,
+      deletedAt: null,
+    },
+    include: [
+      {
+        model: Role,
+        as: "role",
+      },
+    ],
+  });
+
+  return dataList;
+};
+
+const getByIdInvitation = async ({ orgSlug, inviteId }) => {
+  const existingOrg = await getOrgDetails(orgSlug);
+
+  const dataList = await Invitation.findByPk(inviteId, {
+    include: [
+      {
+        model: Role,
+        as: "role",
+      },
+    ],
+  });
+
+  return dataList;
+};
+
 module.exports = {
   createInvitation,
+  getInvitations,
+  getByIdInvitation,
 };

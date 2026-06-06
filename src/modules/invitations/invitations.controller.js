@@ -17,6 +17,36 @@ const createInvitation = async (req, res, next) => {
   }
 };
 
+const getInvitations = async (req, res, next) => {
+  try {
+    const dataList = await invitationService.getInvitations(req.params.orgSlug);
+
+    res.status(200).json({
+      success: true,
+      message: "Invitations retrieved successfully",
+      data: dataList,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getByIdInvitation = async (req, res, next) => {
+  try {
+    const data = await invitationService.getByIdInvitation(req.params);
+
+    res.status(200).json({
+      success: true,
+      message: "Invitation retrieved successfully",
+      data: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createInvitation,
+  getInvitations,
+  getByIdInvitation,
 };

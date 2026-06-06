@@ -10,5 +10,11 @@ router.post(
   validate(createInvitationSchema),
   invitationController.createInvitation,
 );
+router.get("/", authMiddleware, invitationController.getInvitations);
+router.get(
+  "/:inviteId",
+  authMiddleware,
+  invitationController.getByIdInvitation,
+);
 
 module.exports = router;
