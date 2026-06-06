@@ -17,6 +17,34 @@ const createInvitation = async (req, res, next) => {
   }
 };
 
+const acceptInvitation = async (req, res, next) => {
+  try {
+    const data = await invitationService.acceptInvitation(req.params);
+
+    res.status(201).json({
+      success: true,
+      message: "Invitation accepted successfully",
+      data: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resendInvitation = async (req, res, next) => {
+  try {
+    const data = await invitationService.resendInvitation(req.params);
+
+    res.status(201).json({
+      success: true,
+      message: "Invitation resend successfully",
+      data: data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getInvitations = async (req, res, next) => {
   try {
     const dataList = await invitationService.getInvitations(req.params.orgSlug);
@@ -79,4 +107,6 @@ module.exports = {
   getByIdInvitation,
   revokeInvitation,
   deleteInvitation,
+  resendInvitation,
+  acceptInvitation,
 };

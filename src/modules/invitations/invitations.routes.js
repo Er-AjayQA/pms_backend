@@ -10,6 +10,12 @@ router.post(
   validate(createInvitationSchema),
   invitationController.createInvitation,
 );
+router.patch(
+  "/:inviteId/resend",
+  authMiddleware,
+  invitationController.resendInvitation,
+);
+router.post("/accept/:token", invitationController.acceptInvitation);
 router.get("/", authMiddleware, invitationController.getInvitations);
 router.get(
   "/:inviteId",
