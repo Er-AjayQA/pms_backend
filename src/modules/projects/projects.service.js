@@ -59,7 +59,7 @@ const getProjects = async (slug) => {
 
 const createProject = async (
   userId,
-  { name, description, logoUrl, startDate, endDate },
+  { name, description, startDate, endDate },
 ) => {
   const slug = generateSlug(name);
 
@@ -76,17 +76,23 @@ const createProject = async (
     slug,
     description,
     ownerId: userId,
-    logoUrl,
     startDate,
     endDate,
   });
 
-  const ownerRole = await Role({ where: { name: "Owner", deletedAt: null } });
+  const [role, created] = await Role.findOrCreate({
+    where: { name: "Owner", deletedAt: null },
+    defaults: {
+      description: "Administrator Role",
+      status: "active",
+      deletedAt: null,
+    },
+  });
 
   const registerAsMember = await ProjectMember.create({
     projectId: project?.id,
     userId,
-    roleId: ownerRole?.id,
+    roleId: role?.id,
     joinedAt: new Date(),
   });
 

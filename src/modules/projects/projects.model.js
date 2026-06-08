@@ -24,21 +24,17 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
       },
-      logoUrl: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
       status: {
         type: DataTypes.ENUM("active", "inactive"),
         defaultValue: "active",
       },
       startDate: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false,
       },
       endDate: {
-        type: DataTypes.DATE,
-        allowNull: false,
+        type: DataTypes.DATEONLY,
+        allowNull: true,
       },
     },
     {
